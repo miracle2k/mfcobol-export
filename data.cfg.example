@@ -1,0 +1,26 @@
+# The definition of every field has a form:
+#
+# <Field DataType>:<Field Length>
+#
+# where
+# <Field DataType> can be:
+#   X - Character Field
+#   Z - Zoned Decimal (Unpacked)
+#   P - Packed Decimal
+#   * - (skip)
+#
+#
+# <Field Length> is number of characters or number of digits - but not number
+# of bytes! If the field is Packed Decimal then the length in bytes will
+# be computed automatically.
+
+x:10    # character field - probably key
+z:226   # unpacked numeric
+z:3
+z:3
+z:12
+p:11
+p:11
+p:11
+p:11
+p:11
