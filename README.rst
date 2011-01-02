@@ -52,13 +52,13 @@ Supported file types
 
 Microfocus COBOL supports different types of databases:
 
-    1. Line Sequential (no header)
-	 2. Printer Sequential (no header)
-	 3. Record Sequential Files with Fixed Length Records (no header)
-	 4. Record Sequential Files with Variable Length Records
-    5. Relative Files with Fixed Length Records (no header)
-	 6. Relative Files with Variable Length Records
-	 7. Indexed Files
+1. Line Sequential (no header)
+#. Printer Sequential (no header)
+#. Record Sequential Files with Fixed Length Records (no header)
+#. Record Sequential Files with Variable Length Records
+#. Relative Files with Fixed Length Records (no header)
+#. Relative Files with Variable Length Records
+#. Indexed Files
 
 Of those, files containing no header are generally not supported by
 this script. In addition, "Relative Files with Variable Length Records"
