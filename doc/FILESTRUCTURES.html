@@ -1,0 +1,1177 @@
+<!DOCTYPE html PUBLIC "-//SoftQuad//DTD HoTMetaL PRO 4.0::19971010::extensions to HTML 4.0//EN" "hmpro4.dtd">
+<!-- saved from url=(0079)http://supportline.microfocus.com/documentation/books/sx20books/fhfile.htm#u013 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><script src="chrome-extension://ceabjgolhjflgoajnlaecabfgpmhghcd/itunes.js"></script>
+
+<!--* Copyright (C) 1996 Micro Focus Limited.    All Rights Reserved.  *
+-->
+    
+    
+<!--VNT2HTML - Convert Ventura to HTML  1.0.24 17Sep96-->
+    
+    <title>File Structures</title>
+    
+    
+    
+              <link href="./FILESTRUCTURES_files/mfstyle.css" rel="stylesheet" type="text/css">
+<!--TIMESTAMP HTMLINDX V1.1.87 000412 08501383 V"BKFH 2.0.05"--> <meta name="chromesniffer" id="chromesniffer_meta" content=""><script type="text/javascript" src="chrome-extension://homgcnaoacgigpkkljjjekpignblkeae/detector.js"></script></head>
+  
+  <body bgcolor="#FFFFFF">
+
+<!--PREAMBLE--><table border="0" width="100%" bgcolor="#ccccaa"><tbody><tr valign="MIDDLE">
+<td width="40"><a href="http://supportline.microfocus.com/documentation/books/sx20books/fhexsmcn.htm" onclick="window.self.location=&#39;fhexsm.htm&#39;" target="TOC"><img src="./FILESTRUCTURES_files/a_left.gif" alt="Previous"></a></td><td align="LEFT">Callable Sort API</td>
+<td width="4" bgcolor="#FFFFFF"></td>
+<td align="RIGHT">File Status Code Tables</td><td align="RIGHT" width="40"><a href="http://supportline.microfocus.com/documentation/books/sx20books/fhscodcn.htm" onclick="window.self.location=&#39;fhscod.htm&#39;" target="TOC"><img src="./FILESTRUCTURES_files/a_right.gif" alt="Next"></a></td>
+</tr></tbody></table><!--/PREAMBLE-->
+<h1><a name="s001"><!--I File;structures--><!--I Structures;file-->Chapter 14: File Structures</a></h1>
+    
+    <p>This COBOL system provides three types of data file organization:
+      relative, indexed and sequential. Additionally, sequential files fall into
+      one of three categories: record sequential, printer sequential and line
+      sequential. </p>
+    
+    <h2><a name="s002"><!--I File;structures--><!--I Structures-->14.1 File Structures </a></h2>
+    
+    <p>This information is provided for anyone who wants to understand the
+      structure of COBOL files. It can also be useful for debugging programs.
+      However, you do not need to understand these file structures to use data
+      files from COBOL programs.</p>
+
+<!--NOTE -->
+    
+    <hr>
+    
+    <p><b>Caution: </b>You are advised not to process the files yourself using
+      byte-stream I/O, but to use COBOL syntax or the Micro Focus File Handler
+      API. This ensures that applications will function properly if file
+      structures are enhanced or developed in the future.</p>
+    <hr>
+
+<!--/NOTE -->
+    
+    
+    <h2><a name="s003">14.2 Files without Headers</a></h2>
+    
+    <p>Line sequential files, printer sequential files, record sequential files
+      with fixed length records and relative files with fixed length records
+      contain neither file nor record headers.</p>
+    
+    <h3><a name="s004"><!--I Structures;line sequential-->14.2.1 Line Sequential</a></h3>
+    
+    <p>Line sequential files are designed to enable you to read source or text
+      files created with the system editor. As such, the structure is operating
+      system dependent but typically contains variable length records with
+      trailing spaces removed.</p>
+    
+    <p>In a line sequential file, each record in the file is separated from the
+      next by a record delimiter.</p>
+    
+    <p><a name="f001"><img src="./FILESTRUCTURES_files/fhfile01.gif" width="378" height="226"></a><br><br>
+<b>
+
+
+
+
+
+
+
+
+
+
+
+
+        Figure 14-1: Line Sequential Structure</b></p>
+    
+    <p>For files created on UNIX systems the default record delimiter is the
+      Line Feed character specified by the single byte x"OA". For
+      files created on DOS or Windows the default record delimiter is the
+      carriage return/line feed character specified by the byte pair x"ODA".
+      Files created using this COBOL system on UNIX can be read on DOS and
+      Windows, and vice versa.</p>
+    
+    <p>If you set the INSERTNULL configuration parameter to OFF, you must make
+      sure that any COMP data does not contain bytes with a value of x"0A"
+      (record delimiter).</p>
+    
+    <h3><a name="s005"><!--I Structures;printer sequential-->14.2.2 Printer Sequential</a></h3>
+    
+    <p>Printer sequential is the structure of files that are destined for a
+      printer, either directly or by spooling to a disk file. The structure of
+      these files reflects what is required to drive a printer and is
+      independent of the operating system.</p>
+    
+    <p>A printer sequential file consists of a sequence of print records with
+      zero or more vertical positioning characters (such as line-feed) between
+      print records.</p>
+    
+    <p>A print record consists of zero or more printable characters and is
+      terminated by a carriage return (x"0D").</p>
+    
+    <p><a name="f002"><img src="./FILESTRUCTURES_files/fhfile02.gif" width="378" height="378"></a><br><br>
+<b>
+
+
+
+
+
+
+
+
+
+
+
+
+        Figure 14-2: Printer Sequential Structure</b></p>
+    
+    <h3><a name="s006">14.2.3 Record Sequential Files with Fixed Length
+      Records</a></h3>
+    
+    <p>In record sequential files with fixed length records, each record
+      immediately follows the previous record in the file and each record is the
+      same length as the maximum length record.</p>
+    
+    <p><a name="f003"><img src="./FILESTRUCTURES_files/fhfile03.gif" width="382" height="189"></a><br><br>
+<b>
+
+
+
+
+
+
+
+
+
+
+
+
+        Figure 14-3: Record Sequential File with Fixed Length Records</b>
+    </p>
+    
+    <h3><a name="s007">14.2.4 Relative Files with Fixed Length Records</a></h3>
+    
+    <p>A relative file with fixed length records is the same as a record
+      sequential file with fixed length records, except that each record is
+      followed by a record marker.</p>
+    
+    <p>The current state of a record for fixed length relative records is
+      indicated by a one-byte marker as follows: </p>
+    <table border="0" width="100%">
+      <tbody><tr valign="TOP">
+        <th align="LEFT" width="150">Marker (hex)<hr></th>
+        <th align="LEFT">Description<hr></th>
+      </tr>
+      <tr valign="TOP">
+        <td align="LEFT" width="150">0A </td>
+        <td align="LEFT">Record present </td>
+      </tr>
+      <tr valign="TOP">
+        <td align="LEFT" width="150">00 </td>
+        <td align="LEFT">Record deleted or never written<br>
+        </td>
+      </tr>
+    </tbody></table>
+    
+    <p><a name="f004"><img src="./FILESTRUCTURES_files/fhfile04.gif" width="382" height="302"></a><br><br>
+<b>
+
+
+
+
+
+
+
+
+
+
+
+
+        Figure 14-4: Relative File with Fixed Length Records</b> </p>
+    
+    <h2><a name="s008"><!--I Structures;variable--><!--I File;header-->14.3 Files with Headers</a></h2>
+    
+    <p>A file header is a block of 128 bytes at the start of the file. Indexed
+      files, record sequential files with variable length records and relative
+      files with variable length records all contain file headers. In addition,
+      each record in these files is preceded by a 2 or 4 byte record header.</p>
+
+<!--NOTE -->
+    
+    <hr>
+    
+    <p><b>Note: </b>The file header and record header information is
+      maintained by this COBOL system and must not be altered in any way.</p>
+    <hr>
+
+<!--/NOTE -->
+    
+    
+    <h3><a name="s009">14.3.1 Standard File Header</a></h3>
+    
+    <p>The first record in every variable structure file is a system record
+      called the file header. This is normally 128 bytes in length and takes the
+      following form:</p>
+    <table border="1" width="100%">
+      <tbody><tr valign="TOP">
+        <td width="60"><b>Offset</b></td>
+        <td width="60"><b>Size</b></td>
+        <td width="10%"><b>Description</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">0</td>
+        <td width="60">4</td>
+        <td width="80%">Length of the file header. The first 4 bits are always
+        set to 3 (0011 in binary) indicating that this is a system record. The
+        remaining bits contain the length of the file header record. If the
+        maximum record length is less than 4095 bytes, the length is 126 and is
+        held in the next 12 bits; otherwise it is 124 and is held in the next 28
+        bits. Hence, in a file where the maximum record length is less than 4095
+        bytes, this field contains x"30 7E 00 00". Otherwise, this
+        field contains x"30 00 00 7C". </td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">4</td>
+        <td width="60">2</td>
+        <td>Database sequence number, used by add-on products.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">6</td>
+        <td width="60">3</td>
+        <td>Integrity flag. Indexed files only. If this is non-zero when the
+        header is read, it indicates that the file is corrupt.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">8</td>
+        <td width="60">14</td>
+        <td>Creation date and time in YYMMDDHHMMSSCC format. Indexed files
+        only.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">22</td>
+        <td width="60">14</td>
+        <td>Reserved</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">36</td>
+        <td width="60">2</td>
+        <td>Reserved. Value 62 decimal; x"00 3E".</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">38</td>
+        <td width="60">1</td>
+        <td>Not used. Set to zeros.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">39</td>
+        <td width="60">1</td>
+        <td>Organization.<br>
+         1=Sequential<br>
+         2=Indexed<br>
+         3=Relative.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">40</td>
+        <td width="60">1</td>
+        <td>Not used. Set to zeros.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">41</td>
+        <td width="60">1</td>
+        <td>Data compression routine number.<br>
+         0 = No compression<br>
+         1 = CBLDC001<br>
+         2-127 = Reserved for internal use<br>
+         128-255 = User-defined compression routine number</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">42</td>
+        <td width="60">1</td>
+        <td>Not used. Set to zeros.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">43</td>
+        <td width="60">1</td>
+        <td>Indexed files only - type of indexed file. See the section
+        <a href="./FILESTRUCTURES_files/FILESTRUCTURES.html"><i>Indexed Files</i></a> for a list of indexed file
+        types.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">44</td>
+        <td width="60">4</td>
+        <td>Reserved</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">48</td>
+        <td width="60">1</td>
+        <td>Recording mode.<br>
+         0 = Fixed format<br>
+         1 = Variable format<br>
+         For indexed files, the recording mode field of the .idx file takes
+        precedence.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">49</td>
+        <td width="60">5</td>
+        <td>Not used. Set to zeros.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">54</td>
+        <td width="60">4</td>
+        <td>Maximum record length. Example: with a maximum record of length 80
+        characters, this field will contain x"00 00 00 50".</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">58</td>
+        <td width="60">4</td>
+        <td>Minimum record length. Example: with a minimum record length of 2
+        characters, this field will contain x"00 00 00 02".</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">62</td>
+        <td width="60">46</td>
+        <td>Not used. Set to zeros.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">108</td>
+        <td width="60">4</td>
+        <td>Version and build data for the indexed file handler creating the
+        file. Indexed files only.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">112</td>
+        <td width="60">16</td>
+        <td>Not used. Set to zeros.</td>
+      </tr>
+    </tbody></table>
+    
+    <h3><a name="s010">14.3.2 Standard Record Header</a></h3>
+    
+    <p>Each record in a variable structure file is preceded by a two- or
+      four-byte record header. The first 4 bits of this indicate the status of
+      the record, for example, a value of 0100 means that this record is a
+      normal user data record.</p>
+    
+    <p>The remainder of the record header contains the length of the record.
+      For all files where the maximum record size is less than 4095 bytes
+      (excluding the record header), the record header is 2 bytes long. For all
+      other files, the record header is 4 bytes long.</p>
+    
+    <p>The record header for each record starts at an address which is an exact
+      multiple of the data alignment value for the file type (see the section
+      <a href="./FILESTRUCTURES_files/FILESTRUCTURES.html"><i>Indexed Files</i></a> for details of data alignment
+      values). Consequently, a record may be followed by up to n padding
+      characters, usually spaces. These padding characters are not included in
+      the record length.</p>
+    <table border="1" width="100%">
+      <tbody><tr>
+        <td width="100" valign="TOP"><b>First 4 bits</b></td>
+        <td width="85%" valign="TOP"><b>Record type</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="100">1 (0001)</td>
+        <td>A system record. This indicates a duplicate occurrence record in
+        the data file.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="100">2 (0010)</td>
+        <td>Deleted record (available for reuse via the free space list). </td>
+      </tr>
+      <tr valign="TOP">
+        <td width="100">3 (0011)</td>
+        <td>System record. </td>
+      </tr>
+      <tr valign="TOP">
+        <td width="100">4 (0100)</td>
+        <td>Normal user data record. </td>
+      </tr>
+      <tr valign="TOP">
+        <td width="100">5 (0101)</td>
+        <td>Reduced user data record (indexed files only). The area immediately
+        following the data, as indicated by the length in the header, indicates
+        the length between the end of the data record plus any padding
+        characters and the start of the next record header. This information is
+        contained in either a 2-byte or 4-byte field (see the section
+        <a href="./FILESTRUCTURES_files/FILESTRUCTURES.html"><i>Indexed Files</i></a> for details). </td>
+      </tr>
+      <tr valign="TOP">
+        <td width="100">6 (0110)</td>
+        <td>Pointer record (indexed files only). The first <i>n</i> bytes
+        following the record header contain the offset in the file to the
+        location of the user data record, where <i>n</i> is the file pointer
+        size for the indexed file type (see the section <a href="./FILESTRUCTURES_files/FILESTRUCTURES.html"><i>Indexed
+          Files</i></a> for details). </td>
+      </tr>
+      <tr valign="TOP">
+        <td width="100">7 (0111)</td>
+        <td>User data record referenced by a pointer record. </td>
+      </tr>
+      <tr valign="TOP">
+        <td width="100">8 (1000)</td>
+        <td>Reduced user data record referenced by a pointer record. </td>
+      </tr>
+    </tbody></table>
+    
+    <h3><a name="s011">14.3.3 Record Sequential File with Variable Length
+      Records</a></h3>
+    
+    <p>In a record sequential file with variable length records, each record
+      written is preceded by a record header containing the length of the
+      record.</p>
+    
+    <p>Up to three padding characters can follow a record to ensure that the
+      next record starts on a four-byte boundary.</p>
+    
+    <p>The file contains a standard file header record.</p>
+    
+    <p><a name="f005"><img src="./FILESTRUCTURES_files/fhfile05.gif" width="378" height="226"></a><br><br>
+<b>
+
+
+
+
+
+
+
+
+
+
+
+
+        Figure 14-5: Record Sequential File with Variable Length Records</b></p>
+    
+    <h3><a name="s012">14.3.4 Relative File with Variable Length Records</a></h3>
+    
+    <p>A relative file with variable length records follows the basic variable
+      structure but each record is placed into a fixed length slot, the length
+      of the slot being the length of the longest record defined, plus the
+      header and terminator characters.</p>
+    
+    <p>The record header for each record contains the length of the logical
+      record written, not the length of the physical fixed length slot.</p>
+    
+    <p>The current state of a record is indicated by a two-byte marker as
+      follows:</p>
+    <table border="0" width="100%">
+      <tbody><tr valign="TOP">
+        <th align="LEFT" width="100">Marker (hex)<hr></th>
+        <th align="LEFT">Description<hr></th>
+      </tr>
+      <tr valign="TOP">
+        <td align="LEFT" width="100">0D0A </td>
+        <td align="LEFT">Record present </td>
+      </tr>
+      <tr valign="TOP">
+        <td align="LEFT" width="100">0D00 </td>
+        <td align="LEFT">Record deleted or never written<br>
+        </td>
+      </tr>
+    </tbody></table>
+    
+    <p><a name="f006"><img src="./FILESTRUCTURES_files/fhfile06.gif" width="453" height="378"></a><br><br>
+<b>
+
+
+
+
+
+
+
+
+
+
+
+
+        Figure 14-6: Relative File with Variable Length Records</b></p>
+    
+    <h3><a name="u013">14.3.5 Indexed Files</a></h3>
+    
+    <p>An index file comprises:</p>
+    <ul>
+      <li>File header record
+        
+        <p>The file header contains information about the file and points to
+          the first free space record and the key information record. </p></li>
+      <li>Free space records
+        
+        <p>Free space records are used to maintain a list of free records in
+          the index file and the data file. </p></li>
+      <li>Key information record
+        
+        <p>The key information record contains details of every key defined for
+          the file, and, for each key, points to its root index node. </p></li>
+      <li>Index node record
+        
+        <p>For each key defined, a complete and independent index is
+          constructed. It consists of a tree of index node records which contain
+          actual key values. Every key value in a node <span class="change" comment="maeb 000308">points</span>
+          either to a subordinate index node record or to the actual data record
+          associated with the key.</p>
+        
+        <p>The records in an index file are always the same length, whether
+          they are index nodes, file header or key information records. The size
+          of the records is determined at the time the file is created and
+          cannot be changed subsequently.</p></li>
+    </ul>
+    
+    <p>The tables below illustrate the different types of indexed file
+      available and the features that they support.</p>
+    
+    <p><b>Table 14-1: Indexed Files - Features Supported</b></p>
+    <table border="1" width="100%">
+      <tbody><tr valign="TOP">
+        <td width="15%"><br>
+        </td>
+        <td width="16%"><b>Supports Files Logically &gt;4Gb</b></td>
+        <td width="16%"><b>Fast Updates on Files with Multiple Duplicate Keys</b></td>
+        <td width="17%"><b>Maximum Occurrences of Duplicate Key Value</b></td>
+        <td width="16%"><b>Support for Variable Length Records and Compression</b></td>
+        <td width="16%"><b>Separate Index File</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="15%">IDXFORMAT"1"</td>
+        <td width="16%">No</td>
+        <td width="16%">No</td>
+        <td width="17%">65535</td>
+        <td width="16%">No</td>
+        <td width="16%">Yes</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="15%">IDXFORMAT"2"</td>
+        <td width="16%">No</td>
+        <td width="16%">No</td>
+        <td width="17%">65535</td>
+        <td width="16%">No</td>
+        <td width="16%">Yes</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="15%">IDXFORMAT"3"</td>
+        <td width="16%">No</td>
+        <td width="16%">No</td>
+        <td width="17%">65535</td>
+        <td width="16%">Yes</td>
+        <td width="16%">Yes</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="15%">IDXFORMAT"4"</td>
+        <td width="16%">No</td>
+        <td width="16%">Yes</td>
+        <td width="17%">4 G</td>
+        <td width="16%">Yes</td>
+        <td width="16%">Yes</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="15%">IDXFORMAT"8"</td>
+        <td width="16%">Yes</td>
+        <td width="16%">Yes</td>
+        <td width="17%">4 G</td>
+        <td width="16%">Yes</td>
+        <td width="16%">No</td>
+      </tr>
+    </tbody></table>
+    
+    <p><b>Table 14-2: Indexed Files - Physical Characteristics</b></p>
+    <table border="1" width="100%">
+      <tbody><tr valign="TOP">
+        <td width="15%"><br>
+        </td>
+        <td width="16%"><b>Duplicate Occurrence Records</b></td>
+        <td width="16%"><b>Data Record Alignment</b></td>
+        <td width="16%"><b>File Pointer Size (bytes)</b></td>
+        <td width="16%"><b>Residue Length Field</b></td>
+        <td width="17%"><b>Index Node Includes Record Header</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="15%">IDXFORMAT"1"</td>
+        <td width="16%">No</td>
+        <td width="16%">1</td>
+        <td width="16%">4</td>
+        <td width="16%">n/a</td>
+        <td width="17%">No</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="15%">IDXFORMAT"2"</td>
+        <td width="16%">No</td>
+        <td width="16%">1</td>
+        <td width="16%">4</td>
+        <td width="16%">n/a</td>
+        <td width="17%">No</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="15%">IDXFORMAT"3"</td>
+        <td width="16%">No</td>
+        <td width="16%">4</td>
+        <td width="16%">4</td>
+        <td width="16%">2</td>
+        <td width="17%">No</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="15%">IDXFORMAT"4"</td>
+        <td width="16%">Yes</td>
+        <td width="16%">4</td>
+        <td width="16%">4</td>
+        <td width="16%">2</td>
+        <td width="17%">No</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="15%">IDXFORMAT"8"</td>
+        <td width="16%">Yes</td>
+        <td width="16%">8</td>
+        <td width="16%">6</td>
+        <td width="16%">4</td>
+        <td width="17%">Yes</td>
+      </tr>
+    </tbody></table>
+    
+    <h4><a name="s014">14.3.5.1 Index File - File Header</a></h4>
+    
+    <p>The file header is located at offset 0 within the index file. The first
+      128 bytes are the same as a standard variable structure file header,
+      except for the fields below.</p>
+    <table border="1" width="100%">
+      <tbody><tr valign="TOP">
+        <td width="60"><b>Offset</b></td>
+        <td width="60"><b>Size</b></td>
+        <td width="80%"><b>Description</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">0</td>
+        <td width="60">4</td>
+        <td>Length of the file header.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">39</td>
+        <td width="60">1</td>
+        <td>Always contains value 2 for indexed organization.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">62</td>
+        <td width="60">14</td>
+        <td>Always contains zeros.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">76</td>
+        <td width="60">1</td>
+        <td>Reserved. Set to 4.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">120</td>
+        <td width="60">8</td>
+        <td>Offset of logical end of the index file.</td>
+      </tr>
+    </tbody></table>
+    
+    <p>The remainder of the file header contains the following fields:</p>
+    <table border="1" width="100%">
+      <tbody><tr>
+        <td width="60"><b>Offset</b></td>
+        <td width="60"><b>Size</b></td>
+        <td width="80%"><b>Description</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">128</td>
+        <td width="60">8</td>
+        <td>Offset of logical end of the data file.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">136</td>
+        <td width="60">1</td>
+        <td>Value 2.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="60">137</td>
+        <td width="60">1</td>
+        <td>Value 2.</td>
+      </tr>
+      <tr>
+        <td width="60">138</td>
+        <td width="60">1</td>
+        <td>Value 4.</td>
+      </tr>
+      <tr>
+        <td width="60">139</td>
+        <td width="60">1</td>
+        <td>Value 4.</td>
+      </tr>
+      <tr>
+        <td width="60">140</td>
+        <td width="60">2</td>
+        <td>Contains the number of keys defined for the file. </td>
+      </tr>
+      <tr>
+        <td width="60">142</td>
+        <td width="60">1</td>
+        <td>Value 0, or 1 if duplicate occurrence records are present. See the
+        section <i>Types of Indexed File</i> for details.</td>
+      </tr>
+      <tr>
+        <td width="60">143</td>
+        <td width="60">1</td>
+        <td>Value 2 or 4. Number of bytes used for occurrence numbers in
+        indices where duplicates are permitted.</td>
+      </tr>
+      <tr>
+        <td width="60">144</td>
+        <td width="60">8</td>
+        <td>Offset of the first key information record.</td>
+      </tr>
+      <tr>
+        <td width="60">152</td>
+        <td width="60">8</td>
+        <td>Offset of the free space record for the data file. For fixed format
+        files, this is a record in the index file of the same format as the
+        index free space record, but the addresses point to free records in the
+        data file. For variable format files, this is the address in the data
+        file of the data free space record. This record has a different
+        structure to the index free space record.</td>
+      </tr>
+      <tr>
+        <td width="60">160</td>
+        <td width="60">8</td>
+        <td>Offset of the first free space record in the index file.</td>
+      </tr>
+      <tr>
+        <td width="60">168</td>
+        <td width="60">4</td>
+        <td>Value zeros.</td>
+      </tr>
+      <tr>
+        <td width="60">172</td>
+        <td width="60">4</td>
+        <td>Index file record length (node size).</td>
+      </tr>
+      <tr>
+        <td width="60">176</td>
+        <td width="60">8</td>
+        <td>Value zeros.</td>
+      </tr>
+      <tr>
+        <td width="60">184</td>
+        <td width="60">328<br>
+         840<br>
+         3912</td>
+        <td>Reserved. Value zeros. For node size 512.<br>
+         Reserved. Value zeros. For node size 1024.<br>
+         Reserved. Value zeros. For node size 4096.</td>
+      </tr>
+    </tbody></table>
+    
+    <h4><a name="s015">14.3.5.2 Index File - Free Space Record</a></h4>
+    
+    <p>The free space record points to the location of free records in the
+      index file or data file (fixed length files only). Continuation records of
+      the same size and structure are created as needed, each pointing to the
+      next continuation record.</p>
+    
+    <p>The first free space record is pointed to by the file header.</p>
+    
+    <p>A free space record contains:</p>
+    <table border="1" width="100%">
+      <tbody><tr valign="TOP">
+        <td width="150"><b>Size</b></td>
+        <td width="75%"><b>Description</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">2</td>
+        <td>Record header. Present only if index nodes have record header (see
+        the section <a href="./FILESTRUCTURES_files/FILESTRUCTURES.html"><i>Indexed Files</i></a>)</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">2</td>
+        <td>Bit 15 Security flag. Value should match value of trailing security
+        flag.<br>
+         Bits 14-0 Pointer to the end of the last free record address entry,
+        relative to the start of this record.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">file-pointer-size</td>
+        <td>Offset of free space continuation record. Zero if no further
+        continuation records.</td>
+      </tr>
+      <tr>
+        <td width="150">file-pointer-size<br>
+         ...<br>
+         file-pointer-size</td>
+        <td>Offset of a free record in the index file.<br>
+         ...<br>
+         Offset of a free record in the index file.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">2</td>
+        <td>Bit 15 Security flag. Value should match value of leading security
+        flag.<br>
+         Bits 14-0 Reserved. Value x"7F".</td>
+      </tr>
+    </tbody></table>
+    <hr>
+    
+    <p><b>Note: </b>The size of <i>file-pointer-size</i> varies according to
+      the type of indexed file. See the section <a href="./FILESTRUCTURES_files/FILESTRUCTURES.html"><i>Indexed
+        Files</i></a> for details.</p>
+    <hr>
+    
+    <h4><a name="s016">14.3.5.3 Index File - Key Information Record</a></h4>
+    
+    <p>The key information record describes the physical characteristics of all
+      the keys used in the file, including the length of each key; where the key
+      is defined within the data record; whether duplicates are permitted, and
+      so on. Within the key information record structure is a substructure, the
+      key block. A key block is created for each key defined. The first key
+      block always describes the primary key. Subsequent key blocks define the
+      alternate keys in the order specified when the file was created. If the
+      key information record is not big enough to hold key blocks for all the
+      keys defined, equal sized continuation records are created, each pointing
+      to the next, until all the keys have been defined.</p>
+    
+    <p>The key information record contains:</p>
+    <table border="1" width="100%">
+      <tbody><tr valign="TOP">
+        <td width="150"><b>Size</b></td>
+        <td width="75%"><b>Description of the field</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">2</td>
+        <td>Record header. Present only if index nodes have record header. See
+        the section <a href="./FILESTRUCTURES_files/FILESTRUCTURES.html"><i>Indexed Files</i></a> for details.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">2</td>
+        <td>Bit 15 Security Flag. Value 0.<br>
+         Bits 14-0 Pointer to the end of the last key block entry in this
+        record, relative to the start of this record.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">file-pointer-size</td>
+        <td>Address of continuation record. Zero if no further continuation
+        records.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">n<br>
+         ...<br>
+         n</td>
+        <td>Key block for primary key<br>
+         ...one for each alternate key in the file<br>
+         Key block</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">1</td>
+        <td>Reserved. Value x"FF".</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">1</td>
+        <td>Reserved. Value x"7E".</td>
+      </tr>
+    </tbody></table>
+    
+    <p>For every type of indexed file except IDXFORMAT"8", the key
+      block contains:</p>
+    <table border="1" width="100%">
+      <tbody><tr valign="TOP">
+        <td width="150"><b>Size</b></td>
+        <td width="90%"><b>Description of the field</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">2</td>
+        <td>Length of this entry in bytes.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">4</td>
+        <td>Address of the root index node record for this key.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">1</td>
+        <td>Key compression:<br>
+         Bit 2 Compression of trailing spaces.<br>
+         Bit 1 Compression of leading characters.<br>
+         Bit 0 Compression of duplicates.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">5<br>
+         ...<br>
+         5</td>
+        <td>Key component block<br>
+         ...if the key is split, one block per component<br>
+         Key component block</td>
+      </tr>
+    </tbody></table>
+    
+    <p>For IDXFORMAT"8" files, the key block contains:</p>
+    <table border="1" width="100%">
+      <tbody><tr valign="TOP">
+        <td width="150"><b>Size</b></td>
+        <td width="90%"><b>Description of the field</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">2</td>
+        <td>Length of this entry in bytes.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">1</td>
+        <td>Sparse key character.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">13</td>
+        <td>Reserved</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">1</td>
+        <td>Key compression:<br>
+         Bit 3 Compression of trailing nulls.<br>
+         Bit 2 Compression of trailing spaces.<br>
+         Bit 1 Compression of leading characters.<br>
+         Bit 0 Compression of duplicates.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">1</td>
+        <td>Key flags:<br>
+         Bit 6 Duplicates permitted.<br>
+         Bit 1 Sparse key.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">6<br>
+         ...<br>
+         6</td>
+        <td>Key component block<br>
+         ...if the key is split, one block per component<br>
+         Key component block</td>
+      </tr>
+    </tbody></table>
+    
+    <p>For every type of indexed file except IDXFORMAT"8", the key
+      component block contains:</p>
+    <table border="1" width="100%">
+      <tbody><tr valign="TOP">
+        <td width="150"><b>Size</b></td>
+        <td width="90%"><b>Description of the field</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">2</td>
+        <td>Bit 15 Duplicates permitted flag. If set, duplicates are permitted.
+        Bits 14-0 Length of component in bytes.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">2</td>
+        <td>Offset of component within data record, starting at 0.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">1</td>
+        <td>Component type. Value zeros.</td>
+      </tr>
+    </tbody></table>
+    
+    <p>For IDXFORMAT"8" files, the key component block contains:</p>
+    <table border="1" width="100%">
+      <tbody><tr valign="TOP">
+        <td width="150"><b>Size</b></td>
+        <td width="90%"><b>Description of the field</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">2</td>
+        <td>Length of component in bytes.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">2</td>
+        <td>Offset of component within data record, starting at 0.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">1</td>
+        <td>Component flags:<br>
+         Bit 6 Descending</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">1</td>
+        <td>Component type:<br>
+         Bit 7 Numeric<br>
+         Bit 6 Signed<br>
+         Bits 5 - 0 If not numeric:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0
+        alphanumeric<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If
+        numeric:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h"00"
+        DISPLAY (SIGN TRAILING INCLUDED)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h"01"
+        DISPLAY (SIGN TRAILING SEPARATE)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h"02"
+        DISPLAY (SIGN LEADING INCLUDED)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h"03"
+        DISPLAY (SIGN LEADING SEPARATE)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h"20"
+        COMP<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h"21"
+        COMP-3<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h"22"
+        COMP-X<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h"23"
+        COMP-5<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h"24"
+        FLOAT</td>
+      </tr>
+    </tbody></table>
+    
+    <h4><a name="s017">14.3.5.4 Index File - Index Node Record</a></h4>
+    
+    <p>For each key defined, a complete and independent index is constructed
+      which consists of a tree of index node records. Each index node record
+      contains actual key values associated with data records written to the
+      indexed file. Every key value in a node <span comment="maeb 000308" class="change">points</span>
+      either to a subordinate index node record or, if it is a leaf node, to the
+      data record associated with the key.</p>
+    
+    <p>The top level node record is called the root.</p>
+    
+    <p>The default node size is 1024 bytes, but can change depending on the
+      largest key size defined for the file. If the largest key is greater than
+      238 bytes, the node size <span class="change" comment="maeb 000308">is</span>
+      4096 bytes.</p>
+    <hr>
+    
+    <p><b>Note: </b>It is possible to change the default node size by setting
+      the XFHNODE environment variable to one of 512, 1024 (the default) or 4096
+      bytes. However, if you set XFHNODE to 512 and the largest key value is
+      greater than 120 bytes, the value of XFHNODE will be overwritten by 1024.
+      Also, if you set XFHNODE to 512 or 1024 and the largest key value is
+      greater than 248, the value of XFHNODE will be overwritten by 4096. The
+      setting of XFHNODE is only effective at the time that the file is created
+      - you cannot alter the node size of an existing file.</p>
+    <hr>
+    
+    <p>The index node record contains:</p>
+    <table border="1" width="100%">
+      <tbody><tr valign="TOP">
+        <td width="150"><b>Size</b></td>
+        <td width="90%"><b>Description of the field</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">2</td>
+        <td>Bit 15 Security flag. Value should match value of trailing security
+        flag.<br>
+         Bits 14-0 Pointer to the end of the last key value block in this
+        record, relative to the start of this record.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">n<br>
+         ...<br>
+         n</td>
+        <td>Key value block<br>
+         ...<br>
+         Key value block</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">1</td>
+        <td>Index number.<br>
+         The value is the same for all nodes belonging to the same index tree.
+        Contains zero if this is the primary key.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">1</td>
+        <td>Bit 7 Security flag. Value should match value of leading security
+        flag.<br>
+         Bits 6-0 Level of this node. Leaf nodes are level 0.</td>
+      </tr>
+    </tbody></table>
+    
+    <p>The key value block contains:</p>
+    <table border="1" width="100%">
+      <tbody><tr valign="TOP">
+        <td width="150"><b>Size</b></td>
+        <td width="75%"><b>Description of the field</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">1</td>
+        <td>Present only when compression of leading characters is enabled. It
+        contains a count of leading characters identical to those in the
+        previous key. It will always be 0 for the first key in a node.</td>
+      </tr>
+      <tr>
+        <td width="150">1</td>
+        <td>Present only when compression of trailing spaces is enabled.
+        Contains a count of trailing spaces for this key value.</td>
+      </tr>
+      <tr>
+        <td width="150">n</td>
+        <td>Key value.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">duplicate-occurrence</td>
+        <td>Optional. Duplicate occurrence number. See the section
+        <a href="./FILESTRUCTURES_files/FILESTRUCTURES.html"><i>Indexed Files</i></a> for details. This field is
+        present only if duplicates are allowed for this key. It contains the
+        duplicate occurrence count. The first key stored that is a duplicate has
+        this field set to 1. Second duplicate has this field set to 2, and so
+        on.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="150">file-pointer-size</td>
+        <td>Most significant bit:<br>
+         Reserved if duplicate key compression is enabled. Set if the next key
+        value block is a duplicate of this one.<br>
+         Remainder:<br>
+         Address of the data record in the data file if this is a leaf node;
+        otherwise, the address of the subordinate index node record in the index
+        file.</td>
+      </tr>
+    </tbody></table>
+    
+    <h4><a name="s018">14.3.5.5 Indexed File - Data File Structure</a></h4>
+    
+    <p>The data file part of an indexed file contains all the data records.</p>
+    
+    <p>Information about free records in the data file is maintained so that
+      space created by deleting records can be re-used, preventing the file from
+      growing too quickly.</p>
+    
+    <p>In a fixed format indexed file, this information is held in a free space
+      record in the index file. This record has the same structure as the index
+      free space record, but the addresses point to data file records.</p>
+    
+    <p>In a variable format indexed file, the information is held in a system
+      record in the data file. All records are a multiple of the data record
+      alignment size. For each slot length, a chain is maintained for all slots
+      of that length that are free. The start of the chain for all lengths is
+      maintained in the data free space record in the data file. This system
+      record is always the same length as the maximum slot length or possible
+      maximum compressed length (a record's length may increase when it is
+      compressed) for the file. Each free slot pointed to contains, in the first
+      <i>n</i> bytes after the record header, the address of the next free slot
+      of the same length. For the last slot in the chain, this address contains
+      zero.</p>
+    
+    <p>The data free space record contains:</p>
+    <table border="1" width="100%">
+      <tbody><tr valign="TOP">
+        <td width="80"><b>Offset</b></td>
+        <td width="80"><b>Size</b></td>
+        <td width="80%"><b>Description of the field</b></td>
+      </tr>
+      <tr valign="TOP">
+        <td width="80">0</td>
+        <td width="80">2 or 4</td>
+        <td>Record header.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="80">2 or 4</td>
+        <td width="80">4</td>
+        <td>Offset of the first free data slot of length 8 bytes.</td>
+      </tr>
+      <tr valign="TOP">
+        <td width="80">6 or 8<br>
+         ...<br>
+         n</td>
+        <td width="80">4</td>
+        <td>Offset of the first free data slot of length 12 bytes.<br>
+         ...<br>
+         Offset of the first free data slot of maximum length.</td>
+      </tr>
+    </tbody></table>
+
+<!--COPYRIGHT-->
+<center><p><font size="-3"></font></p><hr><font size="-3">Copyright © 2000 MERANT International Limited. All rights reserved.<br>
+This document and the <a href="http://supportline.microfocus.com/documentation/books/sx20books/fhfrnt.htm#u001">proprietary marks and names</a>
+              used herein are protected by international law.<hr></font><p></p></center>
+<!--/COPYRIGHT--> 
+<!--POSTAMBLE--><table border="0" width="100%" bgcolor="#ccccaa"><tbody><tr valign="MIDDLE">
+<td width="40"><a href="http://supportline.microfocus.com/documentation/books/sx20books/fhexsmcn.htm" onclick="window.self.location=&#39;fhexsm.htm&#39;" target="TOC"><img src="./FILESTRUCTURES_files/a_left.gif" alt="Previous"></a></td><td align="LEFT">Callable Sort API</td>
+<td width="4" bgcolor="#FFFFFF"></td>
+<td align="RIGHT">File Status Code Tables</td><td align="RIGHT" width="40"><a href="http://supportline.microfocus.com/documentation/books/sx20books/fhscodcn.htm" onclick="window.self.location=&#39;fhscod.htm&#39;" target="TOC"><img src="./FILESTRUCTURES_files/a_right.gif" alt="Next"></a></td>
+</tr></tbody></table><!--/POSTAMBLE-->
+
+
+</body></html>
