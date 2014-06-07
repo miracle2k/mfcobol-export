@@ -511,7 +511,7 @@ class CobolDataFile(object):
                 '>i' if header.long_records else '>h',
                 record_header_bytes)[0]
             # First 4 bits are the record type
-            record_type = (record_header >> 12)
+            record_type = (record_header >> (27 if header.long_records else 12))
             if record_type > 8 or record_type < 0:
                 self._warn('Unknown record type id in record header at '+
                            'offset {}: {}; This is probably a corrupt file.',
