@@ -284,9 +284,10 @@ class DataFileRecord(object):
     # Reduced user data record referenced by a pointer record.
     TYPE_REDUCED_REFERENCED = 0b1000
 
-    def __init__(self, type, data):
+    def __init__(self, type, parsed_data, raw_data):
         self.type = type
-        self.data = data
+        self.data = parsed_data
+        self.raw_data = raw_data
 
     @property
     def type_display(self):
@@ -529,12 +530,12 @@ class CobolDataFile(object):
             # Parse the record
             if not record_type in ignore:
                 # TODO: what about pointers, references?
-                if record_type in (DataFileRecord.TYPE_NORMAL,
-                                   DataFileRecord.TYPE_DELETED):
+                if self.field_def and record_type in (
+                        DataFileRecord.TYPE_NORMAL, DataFileRecord.TYPE_DELETED):
                     fields = parse_record_fields(record_data, self.field_def)
                 else:
                     fields = None
-                yield DataFileRecord(record_type, fields)
+                yield DataFileRecord(record_type, fields, record_data)
 
             # Read the slack bytes. The formula is:
             #    number_slack_bytes = record_length % num_alignment_bytes
