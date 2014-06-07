@@ -544,7 +544,7 @@ class CobolDataFile(object):
             # type.
             if header.num_alignment_bytes:
                 self.read(
-                    (data_length + header_length) % header.num_alignment_bytes)
+                    -(data_length + header_length) % header.num_alignment_bytes)
 
 
 if __name__ == "__main__":
