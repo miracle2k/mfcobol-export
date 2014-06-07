@@ -141,7 +141,7 @@ class DataFileHeader(object):
         return {
             None: '(uninitialized)',
             self.ORGANIZATION_SEQUENTIAL: 'sequential',
-            self.ORGANIZATION_INDEXED: 'index',
+            self.ORGANIZATION_INDEXED: 'indexed',
             self.ORGANIZATION_RELATIVE: 'relative',
         }.get(self.organization, '(unknown)')
 
