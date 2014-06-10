@@ -552,6 +552,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--export-with', type=str,
         help='Use the given field definition to export the data')
+    parser.add_argument('--print-bytes', action="store_true",
+        help='Output raw bytes of every item in database')
     parser.add_argument('files', metavar='DATAFILE', nargs='+')
     args = parser.parse_args()
 
@@ -572,6 +574,16 @@ if __name__ == "__main__":
             file = CobolDataFile(open(filename, 'rb'))
             print("{}: {}".format(filename, file.header.filetype_as_standardized_name))
             file.header.print()
+
+            sum = 0
+            for idx, record in enumerate(file.iter_records()):
+                if args.print_bytes:
+                    print('')
+                    print("%s: %s" % (record.type, repr(record.raw_data.decode('latin1'))))
+                sum += 1
+            print('')
+            print('The file contains {} records.'.format(sum))
+
             if file.warnings:
                 print('!!! THERE ARE WARNINGS !!!')
                 for w in file.warnings:

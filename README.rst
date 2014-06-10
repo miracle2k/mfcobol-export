@@ -38,9 +38,14 @@ Print the headers::
             Integrity Flag: 0
 
 
-Export the data::
+Print the raw bytes of every database item (you do not have field layout yet)::
 
-	 $ ./mfcobol-export --export-with=datadef.cfg FILE1.DAT
+    $ ./mfcobol-export --print-bytes FILE1.DAT
+
+
+Export the data with a field layout defined::
+
+    $ ./mfcobol-export --export-with=datadef.cfg FILE1.DAT
 
 
 For more information on how to declare fields in the .cfg file, see the
