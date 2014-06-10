@@ -40,12 +40,13 @@ Print the headers::
 
 Print the raw bytes of every database item (you do not have field layout yet)::
 
-    $ ./mfcobol-export --print-bytes FILE1.DAT
+    $ ./mfcobol-export --bytes FILE1.DAT
 
 
 Export the data with a field layout defined::
 
-    $ ./mfcobol-export --export-with=datadef.cfg FILE1.DAT
+    $ ./mfcobol-export --fields=datadef.cfg FILE1.DAT
+    $ ./mfcobol-export --fields=datadef.cfg --json FILE1.DAT
 
 
 For more information on how to declare fields in the .cfg file, see the

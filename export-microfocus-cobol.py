@@ -49,7 +49,10 @@ ENCODING = 'iso-8859-1'  # TODO: Should this be configurable? Probably.
 def parse_config(config_file):
     """Returns list of fields definition from a config file.
 
-    Based on: http://www.tek-tips.com/viewthread.cfm?qid=1510638&page=1
+    See example file for a definition of the format.
+
+    Originally based on:
+        http://www.tek-tips.com/viewthread.cfm?qid=1510638&page=1
     """
     config_list = []
     nr_lines = 0
@@ -284,10 +287,9 @@ class DataFileRecord(object):
     # Reduced user data record referenced by a pointer record.
     TYPE_REDUCED_REFERENCED = 0b1000
 
-    def __init__(self, type, parsed_data, raw_data):
+    def __init__(self, type, bytes):
         self.type = type
-        self.data = parsed_data
-        self.raw_data = raw_data
+        self.bytes = bytes
 
     @property
     def type_display(self):
@@ -344,9 +346,8 @@ class CobolDataFile(object):
     ``field_list``.
     """
 
-    def __init__(self, fileobj, field_def=None):
+    def __init__(self, fileobj):
         self.file = fileobj
-        self.field_def = field_def
         self.warnings = []
 
         self._read_header()
@@ -529,13 +530,7 @@ class CobolDataFile(object):
 
             # Parse the record
             if not record_type in ignore:
-                # TODO: what about pointers, references?
-                if self.field_def and record_type in (
-                        DataFileRecord.TYPE_NORMAL, DataFileRecord.TYPE_DELETED):
-                    fields = parse_record_fields(record_data, self.field_def)
-                else:
-                    fields = None
-                yield DataFileRecord(record_type, fields, record_data)
+                yield DataFileRecord(record_type, record_data)
 
             # Read the slack bytes. The formula is:
             #    number_slack_bytes = record_length % num_alignment_bytes
@@ -548,44 +543,87 @@ class CobolDataFile(object):
                     -(data_length + header_length) % header.num_alignment_bytes)
 
 
+def parse_records(records_iter, field_def):
+    """Records in, (record, parsed) out."""
+    for record in records_iter:
+        # TODO: what about pointers, references?
+        if record.type in (
+                DataFileRecord.TYPE_NORMAL, DataFileRecord.TYPE_DELETED):
+            if not field_def is None:
+                yield record, parse_record_fields(record.bytes, field_def)
+            else:
+                yield record, None
+        else:
+            print('------- UNEXPECTED: %s' % record_type)
+
+
+def csv_exporter(records, output):
+    for index, (record, data) in enumerate(records):
+        output.write(",".join(data)+'\n')
+
+def json_exporter(records, output):
+    import json
+    result = []
+    for index, (record, data) in enumerate(records):
+        result.append(data)
+    output.write(json.dumps(result, indent=4))
+
+def bytes_exporter(records, output):
+    for index, (record, _) in enumerate(records):
+        print('')
+        print("%s: %s" % (record.type, repr(record.bytes.decode('latin1'))))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--export-with', type=str,
+    parser.add_argument('--fields', type=str,
         help='Use the given field definition to export the data')
-    parser.add_argument('--print-bytes', action="store_true",
+    parser.add_argument('--bytes', action="store_true",
         help='Output raw bytes of every item in database')
+    parser.add_argument('--csv', action="store_true",
+        help='Output database in CSV format')
+    parser.add_argument('--json', action="store_true",
+        help='Output database in JSON format')
     parser.add_argument('files', metavar='DATAFILE', nargs='+')
     args = parser.parse_args()
 
-    if args.export_with:
+    # Load the field definition file
+    fields = None
+    if args.fields:
+        fields = parse_config(args.fields)
+
+    # Are we asked to output the database records?
+    exporter = None
+    if args.bytes:
+        exporter = bytes_exporter
+    elif args.json:
+        exporter = json_exporter
+    elif args.csv or fields:  # Use as the default
+        exporter = csv_exporter
+
+    if exporter:
         if len(args.files) != 1:
             print('Only a single database file is supported when exporting.')
             sys.exit(1)
 
-        field_list = parse_config(args.export_with)
         for filename in args.files:
-            file = CobolDataFile(open(filename, 'rb'), field_list)
-            for index, record in enumerate(file.iter_records()):
-                if record.data:
-                    print(",".join(record.data))
+            file = CobolDataFile(open(filename, 'rb'))
+            exporter(parse_records(file.iter_records(), fields), sys.stdout)
 
+    # Only output the header
     else:
         for filename in args.files:
             file = CobolDataFile(open(filename, 'rb'))
             print("{}: {}".format(filename, file.header.filetype_as_standardized_name))
             file.header.print()
 
-            sum = 0
-            for idx, record in enumerate(file.iter_records()):
-                if args.print_bytes:
-                    print('')
-                    print("%s: %s" % (record.type, repr(record.raw_data.decode('latin1'))))
-                sum += 1
+            sum = len(list(file.iter_records()))
             print('')
             print('The file contains {} records.'.format(sum))
 
-            if file.warnings:
-                print('!!! THERE ARE WARNINGS !!!')
-                for w in file.warnings:
-                    print('  {}'.format(w))
-            print()
+    # In both cases, the file may have warnings at the end
+    if file.warnings:
+        print('!!! THERE ARE WARNINGS !!!')
+        for w in file.warnings:
+            print('  {}'.format(w))
+        print()
