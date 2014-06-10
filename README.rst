@@ -24,7 +24,7 @@ Usage
 Print the headers::
 
     $ ./mfcobol-export FILE1.DAT
-	 FILE1.DAT: Indexed File with Variable Length Records
+    FILE1.DAT: Indexed File with Variable Length Records
               Organization: index
             Recording Mode: variable
                 Index Type: (not set)
@@ -76,11 +76,11 @@ http://supportline.microfocus.com/documentation/books/nx40/fhorgs.htm
     Official documentation on the file format.
 
 http://www.tek-tips.com/viewthread.cfm?qid=1510638&page=1
-	 Script to parse database records via ad-hoc field definitions. Used
-	 by this exporter.
+    Script to parse database records via ad-hoc field definitions. Used
+    by this exporter.
 
 http://g4u0419c.houston.hp.com/en/64/hppg/hpmixc.htm
-	 Explains the datatypes of Microfocus COBOL.
+  Explains the datatypes of Microfocus COBOL.
 
 
 Other related tools
@@ -91,12 +91,12 @@ http://cb2java.sourceforge.net/
 
 http://www.cobolproducts.com/
     Silber Systems DataViewer and related products; Very expensive, not a
-	 great UI. Can guess the record layout, but this doesn't really work
-	 particularily well.
+    great UI. Can guess the record layout, but this doesn't really work
+    particularily well.
 
 http://www.alchemysolutions.com/products/Fujitsu-Data-Converter-for-Windows/overview
     Fujitsu Data Converter for Windows, part of their NetCOBOL product. No
-	 demo version, prices only on request.
+    demo version, prices only on request.
 
-http://www.connx.com/products/microfocus.html (
+http://www.connx.com/products/microfocus.html
     CONNX for Microfocus
