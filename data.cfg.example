@@ -1,6 +1,6 @@
 # The definition of every field has a form:
 #
-# <Field DataType>:<Field Length>
+# <Field DataType>:<Field Length> [<Pick a Name>]
 #
 # where
 # <Field DataType> can be:
@@ -9,18 +9,30 @@
 #   P - Packed Decimal
 #   * - (skip)
 #
-#
 # <Field Length> is number of characters or number of digits - but not number
 # of bytes! If the field is Packed Decimal then the length in bytes will
 # be computed automatically.
+#
+# You can optionally specify a name for all non-skipped fields, which will make
+# export more useful.
+#
+# Finally, for testing and figuring out the field layout, you can specify a validator
+# for each field - a python expression that must evaluate to true.
 
-x:10    # character field - probably key
-z:226   # unpacked numeric
+x:10            # character field - probably key
+z:226   foo  # unpacked numeric
 z:3
 z:3
 z:12
 p:11
 p:11
+*:5
+    validate: not v.replace(' ', '')   # Validate the field just before
 p:11
 p:11
-p:11
+
+# Validate the first field. This will fail if the field contains non-trailing spaces.
+validate 0: not ' ' in v.rstrip()
+
+# Validate the field named foo
+validate foo: v > 10

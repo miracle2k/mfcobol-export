@@ -16,6 +16,7 @@ Follows the file format description available at:
 
 import os, sys, string, array, struct
 import datetime
+import collections
 import argparse
 from collections import OrderedDict
 
@@ -45,7 +46,6 @@ def packed2num(p):
 
 ENCODING = 'iso-8859-1'  # TODO: Should this be configurable? Probably.
 
-
 def parse_config(config_file):
     """Returns list of fields definition from a config file.
 
@@ -54,7 +54,10 @@ def parse_config(config_file):
     Originally based on:
         http://www.tek-tips.com/viewthread.cfm?qid=1510638&page=1
     """
-    config_list = []
+    Field = collections.namedtuple('Field', ['type', 'length', 'key', 'validator'])
+    fields_by_index = []
+    fields_by_key = {}
+
     nr_lines = 0
     for line in open(config_file):
         nr_lines += 1
@@ -66,27 +69,55 @@ def parse_config(config_file):
         cfg_line = cfg_line.strip()
         # process not empty lines
         if len(cfg_line) > 0:
-            if ':' in cfg_line:
-                # to uppercase
-                cfg_line = cfg_line.upper()
-                # split into a list
-                cfg_line_list = cfg_line.split(':')
-                if cfg_line_list[1].isdigit():
-                    cfg_line_list[1] = int(cfg_line_list[1])
-                    # compute the length of Packed Decimal (COMP-3)
-                    if cfg_line_list[0] == 'P':
-                        cfg_line_list[1] = cfg_line_list[1]/2 + 1
-                    config_list.append(cfg_line_list)
+            if cfg_line.startswith('validate'):
+                print(cfg_line)
+                key, expression = cfg_line[len('validate'):].split(':', 1)
+                # Field to validate is given either by index, key, or its the
+                # last known field.
+                if key.isdigit():
+                    target_index = int(key)
+                elif not key:
+                    target_index = len(fields_by_index) - 1
                 else:
+                    if not key in fields_by_key:
+                        raise ValueError(
+                        ("Error in config line %d: '%s' (References undefined " +
+                         "key %s") % (nr_lines, cfg_line, key))
+                    target_index = fields_by_key[key]
+
+                fields_by_index[target_index] = \
+                    fields_by_index[target_index]._replace(validator=expression)
+                continue
+
+            if ':' in cfg_line:
+                # split into a list
+                field_type, other_part = cfg_line.split(':', 1)
+                field_type = field_type.upper()
+                field_length, field_key = (other_part+' ').split(' ', 1)
+                field_key = field_key.strip()
+
+                if not field_length.isdigit():
                     raise ValueError(
                         ("Error in config line %d: '%s' (Data type " +
                          "length is not numeric)") % (nr_lines, cfg_line))
+
+                field_length = int(field_length)
+                # compute the length of Packed Decimal (COMP-3)
+                if field_type == 'P':
+                    field_length = field_length/2 + 1
+
+                # Add the field to result
+                field = Field(field_type, field_length, field_key, None)
+                fields_by_index.append(field)
+                if field_key:
+                    fields_by_key[field_key] = len(fields_by_index) - 1
+
             else:
                 raise ValueError(
                     ("Error in config line %d: '%s' (Line should " +
                      "have a form <DataType>:<length>)") % (nr_lines, cfg_line))
-    # return list of fields
-    return config_list
+
+    return fields_by_index
 
 
 class DataFileHeader(object):
@@ -307,21 +338,31 @@ class DataFileRecord(object):
         }.get(self.type, '(unknown)')
 
 
-def parse_record_fields(record_bytes, field_list):
+def parse_record_fields(record_bytes, field_def):
+    """Take the raw bytes of a record, apply the field definition.
+
+    Return a 2-tuple of (list, dict). The list contains all non-skipped
+    fields. The dict contains all non-skipped fields that have been
+    assigned a key.
+    """
     start_byte = 0
     end_byte = 0
     total_bytes = 0
-    # parse fields
     nr_fld = 0
-    parsed_fields = []
-    for field in field_list:
+    parsed_list = []
+    parsed_map = {}
+    for field in field_def:
         nr_fld += 1
         total_bytes += field[1]
         end_byte = total_bytes
         field_bytes = record_bytes[start_byte:end_byte]
+        skipped = False
+
+        # Parse the field data based on type
         if field[0] == '*':
-            fld_data = None    # skip
-        if field[0] == 'X':
+            fld_data = field_bytes
+            skipped = True
+        elif field[0] == 'X':
             fld_data = field_bytes.decode(ENCODING).rstrip()
         elif field[0] == 'Z':
             fld_data_num = zoned2num(field_bytes)
@@ -335,10 +376,31 @@ def parse_record_fields(record_bytes, field_list):
                     fld_data = '0.00'
                 else:
                     fld_data = fld_data[:-2] + '.' + fld_data[-2:]
-        if fld_data:
-            parsed_fields.append(fld_data)
+        else:
+            raise ValueError('Unknown field type: %s' % repr(field[0]))
+
+        # Run the field validator
+        if field.validator:
+            try:
+                if not eval(field.validator, {'v': fld_data}):
+                    raise ValueError('validator did not return True')
+            except Exception as e:
+                raise RuntimeError(('Field %s (key %s) in record has data "%s" and '
+                    'fails validator (%s): %s\n\n%s' % (
+                    nr_fld, field.key, fld_data, field.validator, e, record_bytes
+                )))
+
+        # Add to result set
+        if not skipped:
+            parsed_list.append(fld_data)
+            if field.key:
+                parsed_map[field.key] = fld_data
         start_byte = end_byte
-    return parsed_fields
+
+    if end_byte < len(record_bytes):
+        raise ValueError("%s unread bytes at end of record" % (len(record_bytes) - end_byte))
+
+    return parsed_list, parsed_map
 
 
 class CobolDataFile(object):
@@ -554,7 +616,7 @@ def parse_records(records_iter, field_def):
             else:
                 yield record, None
         else:
-            print('------- UNEXPECTED: %s' % record_type)
+            raise ValueError('Unexpected record type: %s' % record.type_display)
 
 
 def csv_exporter(records, output):
@@ -565,13 +627,17 @@ def json_exporter(records, output):
     import json
     result = []
     for index, (record, data) in enumerate(records):
-        result.append(data)
+        # If list and map contain the same items, output only map, otherwise both
+        if len(data[0]) == len(data[1].keys()):
+            result.append(data[1])
+        else:
+            result.append(data)
     output.write(json.dumps(result, indent=4))
 
 def bytes_exporter(records, output):
     for index, (record, _) in enumerate(records):
         print('')
-        print("%s: %s" % (record.type, repr(record.bytes.decode('latin1'))))
+        print("%s: %s" % (record.type, repr(record.bytes)[1:]))
 
 
 if __name__ == "__main__":
@@ -579,7 +645,7 @@ if __name__ == "__main__":
     parser.add_argument('--fields', type=str,
         help='Use the given field definition to export the data')
     parser.add_argument('--bytes', action="store_true",
-        help='Output raw bytes of every item in database')
+        help='Output raw bytes of every record in database')
     parser.add_argument('--csv', action="store_true",
         help='Output database in CSV format')
     parser.add_argument('--json', action="store_true",
