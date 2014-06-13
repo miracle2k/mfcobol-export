@@ -70,7 +70,6 @@ def parse_config(config_file):
         # process not empty lines
         if len(cfg_line) > 0:
             if cfg_line.startswith('validate'):
-                print(cfg_line)
                 key, expression = cfg_line[len('validate'):].split(':', 1)
                 # Field to validate is given either by index, key, or its the
                 # last known field.
