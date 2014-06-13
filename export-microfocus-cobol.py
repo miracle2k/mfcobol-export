@@ -350,6 +350,38 @@ class DataFileRecord(object):
         }.get(self.type, '(unknown)')
 
 
+def print_field_match_debug(matches):
+    """Matches is a list of tuples representing how the bytes of a
+    record have been assigned to the fields in a definition.
+
+        (start_byte, end_byte, bytes, field)
+
+    This will print this data in readable way using colors.
+    """
+    from clint.textui.cols import console_width
+    from clint.packages.colorama import Back
+    COLORS = ('RED', 'BLUE')
+    width = console_width({})
+    col = 0
+    key_subline = ''
+    for idx, (start, end, bytes, field) in enumerate(matches):
+        if col + len(bytes) > width:
+            col = 0
+            sys.stdout.write('\n')
+            sys.stdout.write(key_subline + '\n')
+            key_subline = ''
+
+        sys.stdout.write(getattr(Back, COLORS[idx % len(COLORS)]))
+        sys.stdout.write(bytes.decode('latin1'))
+        sys.stdout.write(Back.RESET)
+        col += len(bytes)
+
+        key_subline += "%s" % (field.key or '')[:len(bytes)].ljust(len(bytes))
+
+    sys.stdout.write('\n')
+    sys.stdout.write(key_subline + '\n')
+
+
 def parse_record_fields(record_bytes, field_def):
     """Take the raw bytes of a record, apply the field definition.
 
@@ -363,12 +395,17 @@ def parse_record_fields(record_bytes, field_def):
     nr_fld = 0
     parsed_list = []
     parsed_map = {}
+    matches_with_pos = []
     for field in field_def:
         nr_fld += 1
         total_bytes += field[1]
         end_byte = total_bytes
         field_bytes = record_bytes[start_byte:end_byte]
         skipped = False
+
+        # For debugging output keep a list of data pieces and the fields
+        # that they matched.
+        matches_with_pos.append((start_byte, end_byte, field_bytes, field))
 
         # Parse the field data based on type
         if field[0] == '*':
@@ -397,6 +434,7 @@ def parse_record_fields(record_bytes, field_def):
                 if not eval(field.validator, {'v': fld_data}):
                     raise ValueError('validator did not return True')
             except Exception as e:
+                print_field_match_debug(matches_with_pos)
                 raise RuntimeError(('Field %s (key %s) in record has data "%s" and '
                     'fails validator (%s): %s\n\n%s' % (
                     nr_fld, field.key, fld_data, field.validator, e, record_bytes
