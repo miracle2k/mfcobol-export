@@ -85,7 +85,20 @@ def parse_config(config_file):
                     target_index = fields_by_key[key]
 
                 fields_by_index[target_index] = \
-                    fields_by_index[target_index]._replace(validator=expression)
+                    fields_by_index[target_index]._replace(validator=expression.strip())
+                continue
+
+            # Repeat the last X lines with a different key prefix
+            # Only already attached validators will be copied.
+            if cfg_line.startswith('repeat'):
+                last_x, new_prefix = cfg_line[len('repeat'):].split(':', 1)
+                new_prefix = new_prefix.strip()
+                last_x = int(last_x)
+                for f in fields_by_index[-last_x:]:
+                    nf = f._replace(key=new_prefix + f.key[len(new_prefix):] if f.key else '')
+                    fields_by_index.append(nf)
+                    if nf.key:
+                        fields_by_key[field_key] = len(fields_by_index) - 1
                 continue
 
             if ':' in cfg_line:
