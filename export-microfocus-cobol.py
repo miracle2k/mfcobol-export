@@ -116,7 +116,7 @@ def parse_config(config_file):
                 field_length = int(field_length)
                 # compute the length of Packed Decimal (COMP-3)
                 if field_type == 'P':
-                    field_length = field_length/2 + 1
+                    field_length = field_length//2 + 1
 
                 # Add the field to result
                 field = Field(field_type, field_length, field_key, None)
