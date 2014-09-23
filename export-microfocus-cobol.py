@@ -401,6 +401,9 @@ def parse_record_fields(record_bytes, field_def):
         total_bytes += field[1]
         end_byte = total_bytes
         field_bytes = record_bytes[start_byte:end_byte]
+        if end_byte > len(record_bytes):
+            raise ValueError('Field %s reads beyond end of file: %s bytes missing' % (
+                field, end_byte - len(record_bytes)))
         skipped = False
 
         # For debugging output keep a list of data pieces and the fields
