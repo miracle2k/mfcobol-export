@@ -715,7 +715,7 @@ def json_exporter(records, output):
 def bytes_exporter(records, output):
     for index, (record, _) in enumerate(records):
         print('')
-        print("%s: %s" % (record.type, repr(record.bytes)[1:]))
+        print("%s: %s" % (record.type_display, repr(record.bytes)[1:]))
 
 
 if __name__ == "__main__":
