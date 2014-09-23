@@ -54,7 +54,8 @@ def parse_config(config_file):
     Originally based on:
         http://www.tek-tips.com/viewthread.cfm?qid=1510638&page=1
     """
-    Field = collections.namedtuple('Field', ['type', 'length', 'key', 'validator'])
+    Field = collections.namedtuple('Field', [
+        'type', 'length', 'key', 'validator', 'skipper'])
     fields_by_index = []
     fields_by_key = {}
 
@@ -69,10 +70,16 @@ def parse_config(config_file):
         cfg_line = cfg_line.strip()
         # process not empty lines
         if len(cfg_line) > 0:
+            # Try to read a 'skip' or 'validate' func
+            readfunc = None
             if cfg_line.startswith('validate'):
-                key, expression = cfg_line[len('validate'):].split(':', 1)
-                # Field to validate is given either by index, key, or its the
-                # last known field.
+                readfunc = 'validate'
+            elif cfg_line.startswith('skip'):
+                readfunc = 'skip'
+            if readfunc:
+                key, expression = cfg_line[len(readfunc):].split(':', 1)
+                # Field to validate/skip is given either by index, key,
+                # or its the last known field.
                 if key.isdigit():
                     target_index = int(key)
                 elif not key:
@@ -84,8 +91,9 @@ def parse_config(config_file):
                          "key %s") % (nr_lines, cfg_line, key))
                     target_index = fields_by_key[key]
 
+                optname = 'validator' if readfunc == 'validate' else 'skipper'
                 fields_by_index[target_index] = \
-                    fields_by_index[target_index]._replace(validator=expression.strip())
+                    fields_by_index[target_index]._replace(**{optname: expression.strip()})
                 continue
 
             # Repeat the last X lines with a different key prefix
@@ -119,7 +127,7 @@ def parse_config(config_file):
                     field_length = field_length//2 + 1
 
                 # Add the field to result
-                field = Field(field_type, field_length, field_key, None)
+                field = Field(field_type, field_length, field_key, None, None)
                 fields_by_index.append(field)
                 if field_key:
                     fields_by_key[field_key] = len(fields_by_index) - 1
@@ -431,6 +439,19 @@ def parse_record_fields(record_bytes, field_def):
         else:
             raise ValueError('Unknown field type: %s' % repr(field[0]))
 
+        # Run the skipper. If this returns True, we skip the whole record.
+        if field.skipper:
+            try:
+                if eval(field.skipper, {
+                        'v': fld_data, 'fields_map': parsed_map}):
+                    return
+            except Exception as e:
+                print_field_match_debug(matches_with_pos)
+                raise RuntimeError(('Field %s (key %s) in record has data "%s" and '
+                    'skipper failed with an exception (%s): %s\n\n%s' % (
+                    nr_fld, field.key, fld_data, field.validator, e, record_bytes
+                )))
+
         # Run the field validator
         if field.validator:
             try:
@@ -666,7 +687,9 @@ def parse_records(records_iter, field_def):
         if record.type in (
                 DataFileRecord.TYPE_NORMAL, DataFileRecord.TYPE_DELETED):
             if not field_def is None:
-                yield record, parse_record_fields(record.bytes, field_def)
+                parsed = parse_record_fields(record.bytes, field_def)
+                if parsed is not None:
+                    yield record, parsed
             else:
                 yield record, None
         else:
