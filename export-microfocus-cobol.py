@@ -675,7 +675,8 @@ def parse_records(records_iter, field_def):
 
 def csv_exporter(records, output):
     for index, (record, data) in enumerate(records):
-        output.write(",".join(data)+'\n')
+        as_list, as_map = data
+        output.write(",".join(as_list)+'\n')
 
 def json_exporter(records, output):
     import json
