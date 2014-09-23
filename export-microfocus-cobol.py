@@ -431,7 +431,8 @@ def parse_record_fields(record_bytes, field_def):
         # Run the field validator
         if field.validator:
             try:
-                if not eval(field.validator, {'v': fld_data}):
+                if not eval(field.validator, {
+                    'v': fld_data, 'fields_map': parsed_map}):
                     raise ValueError('validator did not return True')
             except Exception as e:
                 print_field_match_debug(matches_with_pos)
