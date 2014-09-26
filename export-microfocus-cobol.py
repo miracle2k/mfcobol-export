@@ -684,16 +684,14 @@ def parse_records(records_iter, field_def):
     """Records in, (record, parsed) out."""
     for record in records_iter:
         # TODO: what about pointers, references?
-        if record.type in (
-                DataFileRecord.TYPE_NORMAL, DataFileRecord.TYPE_DELETED):
-            if not field_def is None:
-                parsed = parse_record_fields(record.bytes, field_def)
-                if parsed is not None:
-                    yield record, parsed
-            else:
-                yield record, None
+        is_deleted = record.type == DataFileRecord.TYPE_DELETED
+        if not field_def is None:
+            parsed = parse_record_fields(record.bytes, field_def)
+            if parsed is not None:
+                parsed[1]['__deleted'] = is_deleted
+                yield record, parsed
         else:
-            raise ValueError('Unexpected record type: %s' % record.type_display)
+            yield record, None
 
 
 def csv_exporter(records, output):
@@ -706,7 +704,8 @@ def json_exporter(records, output):
     result = []
     for index, (record, data) in enumerate(records):
         # If list and map contain the same items, output only map, otherwise both
-        if len(data[0]) == len(data[1].keys()):
+        # We do ignore __ for this, which is our __deleted key.
+        if len(data[0]) == len([d for d in data[1].keys() if not d.startswith('__')]):
             result.append(data[1])
         else:
             result.append(data)
